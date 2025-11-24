@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # 1. Base de Datos
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sql_server
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=TuPasswordFuerte123!
+    ports:
+      - "1433:1433"
+    networks:
+      - red-inmobiliaria
+
+  # 2. Backend (API Node.js)
+  api:
+    build: ./backend
+    container_name: backend_node
+    ports:
+      - "3000:3000"
+    volumes:
+      - D:/Fotos:/app/uploads
+    depends_on:
+      - db
+    environment:
+      - DB_USER=sa
+      - DB_PWD=TuPasswordFuerte123!
+      - DB_SERVER=db
+      - DB_NAME=InmobiliariaDB
+    networks:
+      - red-inmobiliaria
+
+  # 3. Frontend (Nginx)
+  web:
+    build: ./frontend
+    container_name: frontend_nginx
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+    networks:
+      - red-inmobiliaria
+
+networks:
+  red-inmobiliaria:
+    driver: bridge

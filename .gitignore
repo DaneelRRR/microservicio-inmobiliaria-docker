@@ -1,0 +1,11 @@
+# Dependencias de Node
+node_modules/
+**/node_modules/
+
+# Variables de entorno
+.env
+
+# Archivos de sistema operativo y temporales
+Thumbs.db
+dist/
+build/

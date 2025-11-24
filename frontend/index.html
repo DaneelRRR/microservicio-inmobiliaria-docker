@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InmoManager Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body class="flex h-screen overflow-hidden bg-[#F4F7FE]">
+
+    <aside class="w-72 bg-white flex flex-col justify-between h-full shadow-xl z-20 hidden md:flex">
+        <div>
+            <div class="h-24 flex items-center px-8 border-b border-gray-100">
+                <i class="ph-fill ph-house-line text-3xl text-blue-600 mr-2"></i>
+                <span class="font-bold text-2xl text-gray-800 tracking-tight">Inmo<span
+                        class="text-blue-600">Grafica</span>.</span>
+            </div>
+
+            <nav class="mt-8 px-4 space-y-2">
+                <p class="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Principal</p>
+
+                <a href="#" onclick="cargarVistaDashboard()"
+                    class="flex items-center px-4 py-3 bg-blue-50 text-blue-600 rounded-xl transition-all shadow-sm font-semibold">
+                    <i class="ph ph-squares-four text-xl mr-3"></i> Dashboard
+                </a>
+
+                <p class="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 mt-6">Filtros Rápidos</p>
+
+                <a href="#" onclick="filtrarPorEstado('pendiente')"
+                    class="flex items-center px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-800 rounded-xl transition-all font-medium group">
+                    <span class="w-2 h-2 rounded-full bg-yellow-400 mr-3 group-hover:scale-125 transition"></span>
+                    En Proceso
+                </a>
+                <a href="#" onclick="filtrarPorEstado('publicado')"
+                    class="flex items-center px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-800 rounded-xl transition-all font-medium group">
+                    <span class="w-2 h-2 rounded-full bg-green-500 mr-3 group-hover:scale-125 transition"></span>
+                    Publicados
+                </a>
+            </nav>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-full overflow-hidden relative">
+
+        <header class="h-24 bg-[#F4F7FE]/90 backdrop-blur-md flex items-center justify-between px-8 z-10">
+            <div>
+                <h1 id="page-title" class="text-2xl font-bold text-gray-800">Dashboard General</h1>
+                <p id="page-subtitle" class="text-sm text-gray-500 mt-1">Bienvenido al panel de gestión.</p>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div class="relative hidden lg:block group">
+                    <i
+                        class="ph ph-magnifying-glass absolute left-4 top-3.5 text-gray-400 group-focus-within:text-blue-500 transition"></i>
+                    <input type="text" id="search-input" onkeyup="filtrarBusqueda()" placeholder="Buscar archivos..."
+                        class="pl-11 pr-4 py-3 w-64 bg-white rounded-full text-sm shadow-sm border border-transparent focus:border-blue-200 focus:ring-4 focus:ring-blue-100 outline-none transition-all">
+                </div>
+
+                <button onclick="abrirModalUpload()"
+                    class="flex items-center gap-2 bg-[#1B254B] hover:bg-[#2c3b7a] text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all font-medium">
+                    <i class="ph ph-cloud-arrow-up text-lg"></i>
+                    <span>Subir Archivo</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-8 no-scrollbar" id="content-area">
+            <div id="loader" class="flex flex-col items-center justify-center h-full text-gray-400">
+                <i class="ph ph-spinner animate-spin text-4xl mb-3"></i>
+                <p>Cargando inmuebles...</p>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="upload-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-lg rounded-3xl p-8 shadow-2xl modal-enter relative">
+
+            <button aria-label="Cerrar modal" onclick="cerrarModalUpload()"
+                class="absolute top-5 right-5 p-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-500 transition">
+                <i class="ph ph-x"></i>
+            </button>
+
+            <div class="text-center mb-8">
+                <div
+                    class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl">
+                    <i class="ph ph-cloud-arrow-up"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800">Subir Archivos</h3>
+                <p class="text-sm text-gray-500">Elige el rol y arrastra tus archivos</p>
+            </div>
+
+            <form id="upload-form" onsubmit="procesarSubida(event)">
+                <div class="bg-gray-100 p-1 rounded-xl flex mb-6">
+                    <button type="button" onclick="setRol('fotografo')" id="btn-foto"
+                        class="flex-1 py-2 rounded-lg text-sm font-semibold shadow-sm bg-white text-gray-800 transition-all">
+                        Fotógrafo</button>
+                    <button type="button" onclick="setRol('grafista')" id="btn-graf"
+                        class="flex-1 py-2 rounded-lg text-sm font-semibold text-gray-500 hover:text-gray-700 transition-all">
+                        Grafista</button>
+                </div>
+                <input type="hidden" id="rol-seleccionado" value="fotografo">
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Código del Bien</label>
+                        <input type="text" id="codigo-input" required placeholder="Ej: COD-555"
+                            class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition">
+                    </div>
+
+                    <div id="desc-container">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Descripción</label>
+                        <textarea id="desc-input" placeholder="Detalles del inmueble..."
+                            class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition"></textarea>
+                    </div>
+
+                    <label id="drop-zone"
+                        class="block w-full border-2 border-dashed border-gray-300 rounded-2xl p-6 text-center cursor-pointer hover:bg-gray-50 hover:border-blue-400 transition group">
+                        <i class="ph ph-file-zip ..."></i>
+                        <p class="text-sm text-gray-600 font-medium"><span class="text-blue-600 underline">Clic para
+                                buscar</span> o arrastra</p>
+                        <p class="text-xs text-gray-400 mt-1" id="file-name-display">ZIP, RAR o Imágenes</p>
+                        <input type="file" id="file-input" required class="hidden" onchange="mostrarNombreArchivo()">
+                    </label>
+                </div>
+
+                <button type="submit"
+                    class="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-600/30 transition transform hover:-translate-y-1">
+                    Iniciar Carga
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+
+</html>
